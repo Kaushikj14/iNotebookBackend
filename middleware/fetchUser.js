@@ -6,7 +6,7 @@ const JWT_SECRET = 'harryisagoodb&oy';
 // midddleware takes req,res,and next as argument.
 const fetchUser=(req,res,next)=>{
     
-    // get the user from the jwt token and add id to re object
+    // get the user from the jwt token and add id to the object
     const token = req.header('auth-token');
     if(!token){
         res.status(401).send({error:"Please authenticate using the valid token"})
