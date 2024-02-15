@@ -18,16 +18,17 @@ router.post('/createuser',
 
 
     ], async (req, res) => {
+        let success = false;
         // If there are errors return bad request and errors
         const result = validationResult(req);
         if (!result.isEmpty()) {
-            return res.send({ errors: result.array() });
+            return res.send({ success, errors: result.array() });
         }
         try {
             // check wheather user exists with same email
             let user = await User.findOne({ email: req.body.email });
             if (user) {
-                return res.status(400).json({ errors: "Sorry user already exists with same email ID" })
+                return res.status(400).json({ success,errors: "Sorry user already exists with same email ID" })
             }
             else {
                 // secured password
@@ -48,7 +49,8 @@ router.post('/createuser',
             }
             const authToken = jwt.sign(data, JWT_SECRET);
             // console.log(jwtdata);
-            res.json({ authToken })
+            success=true;
+            res.json({ success,authToken })
         } catch (error) {
             console.error(error.message);
             res.status(500).send("Soome error occured")
@@ -61,6 +63,9 @@ router.post('/login',
         body('email', 'Enter a valid email').isEmail(),
         body('password', 'Enter a password').exists(),
     ], async (req, res) => {
+
+        let success=false;
+
     // If there are errors then send the bad request and error message
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -70,14 +75,14 @@ router.post('/login',
     try {
         let user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ error: "Please try to login with correct credentials" });
+            return res.status(400).json({ success,error: "Please try to login with correct credentials" });
         }
 
 
         // bcrypt.compare is a async function so we have to add await else we will get the error
         const passwordCompare = await bcrypt.compare(password, user.password);
         if (!passwordCompare) {
-            return res.status(400).json({ error: "Please try to login with correct credentials" });
+            return res.status(400).json({ success,error: "Please try to login with correct credentials" });
         }
 
         // data of the user which we will be sendings
@@ -88,7 +93,8 @@ router.post('/login',
         }
 
         const authToken = jwt.sign(payload, JWT_SECRET);
-        res.json({ authToken })
+        success=true;
+        res.json({ success,authToken })
 
     } catch (error) {
         console.error(error.message);
